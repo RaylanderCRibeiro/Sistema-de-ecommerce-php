@@ -1,4 +1,5 @@
 <?php
+
 /**
  * PHPMailer RFC821 SMTP email transport class.
  * PHP Version 5
@@ -150,16 +151,16 @@ class SMTP
      */
     public $Timelimit = 300;
 
-	/**
-	 * @var array patterns to extract smtp transaction id from smtp reply
-	 * Only first capture group will be use, use non-capturing group to deal with it
-	 * Extend this class to override this property to fulfil your needs.
-	 */
-	protected $smtp_transaction_id_patterns = array(
-		'exim' => '/[0-9]{3} OK id=(.*)/',
-		'sendmail' => '/[0-9]{3} 2.0.0 (.*) Message/',
-		'postfix' => '/[0-9]{3} 2.0.0 Ok: queued as (.*)/'
-	);
+    /**
+     * @var array patterns to extract smtp transaction id from smtp reply
+     * Only first capture group will be use, use non-capturing group to deal with it
+     * Extend this class to override this property to fulfil your needs.
+     */
+    protected $smtp_transaction_id_patterns = array(
+        'exim' => '/[0-9]{3} OK id=(.*)/',
+        'sendmail' => '/[0-9]{3} 2.0.0 (.*) Message/',
+        'postfix' => '/[0-9]{3} 2.0.0 Ok: queued as (.*)/'
+    );
 
     /**
      * The socket for the server connection.
@@ -232,7 +233,7 @@ class SMTP
                     ENT_QUOTES,
                     'UTF-8'
                 )
-                . "<br>\n";
+                    . "<br>\n";
                 break;
             case 'echo':
             default:
@@ -242,7 +243,7 @@ class SMTP
                     "\n",
                     "\n                   \t                  ",
                     trim($str)
-                )."\n";
+                ) . "\n";
         }
     }
 
@@ -276,7 +277,7 @@ class SMTP
         }
         // Connect to the SMTP server
         $this->edebug(
-            "Connection: opening to $host:$port, timeout=$timeout, options=".var_export($options, true),
+            "Connection: opening to $host:$port, timeout=$timeout, options=" . var_export($options, true),
             self::DEBUG_CONNECTION
         );
         $errno = 0;
@@ -318,7 +319,7 @@ class SMTP
             );
             $this->edebug(
                 'SMTP ERROR: ' . $this->error['error']
-                . ": $errstr ($errno)",
+                    . ": $errstr ($errno)",
                 self::DEBUG_CLIENT
             );
             return false;
@@ -398,7 +399,7 @@ class SMTP
         }
 
         if (array_key_exists('EHLO', $this->server_caps)) {
-        // SMTP extensions are available. Let's try to find a proper authentication method
+            // SMTP extensions are available. Let's try to find a proper authentication method
 
             if (!array_key_exists('AUTH', $this->server_caps)) {
                 $this->setError('Authentication is not allowed at this stage');
@@ -424,7 +425,7 @@ class SMTP
                     $this->setError('No supported authentication methods found');
                     return false;
                 }
-                self::edebug('Auth method selected: '.$authtype, self::DEBUG_LOWLEVEL);
+                self::edebug('Auth method selected: ' . $authtype, self::DEBUG_LOWLEVEL);
             }
 
             if (!in_array($authtype, $this->server_caps['AUTH'])) {
@@ -445,8 +446,7 @@ class SMTP
                     'User & Password',
                     base64_encode("\0" . $username . "\0" . $password),
                     235
-                )
-                ) {
+                )) {
                     return false;
                 }
                 break;
@@ -492,7 +492,7 @@ class SMTP
                     $this->setError($temp->error);
                     $this->edebug(
                         'You need to enable some modules in your php.ini file: '
-                        . $this->error['error'],
+                            . $this->error['error'],
                         self::DEBUG_CLIENT
                     );
                     return false;
@@ -504,8 +504,7 @@ class SMTP
                     'AUTH NTLM',
                     'AUTH NTLM ' . base64_encode($msg1),
                     334
-                )
-                ) {
+                )) {
                     return false;
                 }
                 //Though 0 based, there is a white space after the 3 digit number
@@ -728,7 +727,7 @@ class SMTP
     public function hello($host = '')
     {
         //Try extended hello first (RFC 2821)
-        return (boolean)($this->sendHello('EHLO', $host) or $this->sendHello('HELO', $host));
+        return (bool)($this->sendHello('EHLO', $host) or $this->sendHello('HELO', $host));
     }
 
     /**
@@ -893,7 +892,7 @@ class SMTP
             $code_ex = (count($matches) > 2 ? $matches[2] : null);
             // Cut off error code from each response line
             $detail = preg_replace(
-                "/{$code}[ -]".($code_ex ? str_replace('.', '\\.', $code_ex).' ' : '')."/m",
+                "/{$code}[ -]" . ($code_ex ? str_replace('.', '\\.', $code_ex) . ' ' : '') . "/m",
                 '',
                 $this->last_reply
             );
@@ -1105,8 +1104,8 @@ class SMTP
             // Now check if reads took too long
             if ($endtime and time() > $endtime) {
                 $this->edebug(
-                    'SMTP -> get_lines(): timelimit reached ('.
-                    $this->Timelimit . ' sec)',
+                    'SMTP -> get_lines(): timelimit reached (' .
+                        $this->Timelimit . ' sec)',
                     self::DEBUG_LOWLEVEL
                 );
                 break;
@@ -1223,27 +1222,27 @@ class SMTP
         );
     }
 
-	/**
-	 * Will return the ID of the last smtp transaction based on a list of patterns provided
-	 * in SMTP::$smtp_transaction_id_patterns.
-	 * If no reply has been received yet, it will return null.
-	 * If no pattern has been matched, it will return false.
-	 * @return bool|null|string
-	 */
-	public function getLastTransactionID()
-	{
-		$reply = $this->getLastReply();
+    /**
+     * Will return the ID of the last smtp transaction based on a list of patterns provided
+     * in SMTP::$smtp_transaction_id_patterns.
+     * If no reply has been received yet, it will return null.
+     * If no pattern has been matched, it will return false.
+     * @return bool|null|string
+     */
+    public function getLastTransactionID()
+    {
+        $reply = $this->getLastReply();
 
-		if (empty($reply)) {
-			return null;
-		}
+        if (empty($reply)) {
+            return null;
+        }
 
-		foreach($this->smtp_transaction_id_patterns as $smtp_transaction_id_pattern) {
-			if(preg_match($smtp_transaction_id_pattern, $reply, $matches)) {
-				return $matches[1];
-			}
-		}
+        foreach ($this->smtp_transaction_id_patterns as $smtp_transaction_id_pattern) {
+            if (preg_match($smtp_transaction_id_pattern, $reply, $matches)) {
+                return $matches[1];
+            }
+        }
 
-		return false;
+        return false;
     }
 }

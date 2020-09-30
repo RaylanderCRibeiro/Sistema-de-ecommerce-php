@@ -54,6 +54,3 @@
 			echo "<html><script>location.href-'ok.php'</script></html>";
 		}
 		}
-
-
-?>
