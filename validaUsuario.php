@@ -36,5 +36,3 @@
 	}else{
 		header('location:erro.php');
 	}
-
-?>
